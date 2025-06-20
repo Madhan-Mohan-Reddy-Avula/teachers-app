@@ -28,13 +28,14 @@ const menuItems = [
 ];
 
 export function TeacherSidebar({ activeSection, setActiveSection }: TeacherSidebarProps) {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible>
+    <Sidebar className={isCollapsed ? "w-14" : "w-60"} collapsible="icon">
       <div className="p-4 border-b">
         <SidebarTrigger className="mb-2" />
-        {!collapsed && (
+        {!isCollapsed && (
           <h2 className="text-xl font-bold text-blue-700">Teacher Portal</h2>
         )}
       </div>
@@ -55,7 +56,7 @@ export function TeacherSidebar({ activeSection, setActiveSection }: TeacherSideb
                     }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
-                    {!collapsed && <span>{item.title}</span>}
+                    {!isCollapsed && <span>{item.title}</span>}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
