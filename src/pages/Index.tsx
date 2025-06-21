@@ -7,15 +7,21 @@ import { HomeworkManager } from "@/components/HomeworkManager";
 import { EventsManager } from "@/components/EventsManager";
 import { TimetableManager } from "@/components/TimetableManager";
 import { ResultsManager } from "@/components/ResultsManager";
+import { StudentsByClass } from "@/components/StudentsByClass";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [showStudentsByClass, setShowStudentsByClass] = useState(false);
 
   const renderActiveSection = () => {
+    if (showStudentsByClass) {
+      return <StudentsByClass onBack={() => setShowStudentsByClass(false)} />;
+    }
+
     switch (activeSection) {
       case "dashboard":
-        return <Dashboard />;
+        return <Dashboard onShowStudentsByClass={() => setShowStudentsByClass(true)} />;
       case "students":
         return <StudentsManager />;
       case "homework":
@@ -27,11 +33,15 @@ const Index = () => {
       case "results":
         return <ResultsManager />;
       default:
-        return <Dashboard />;
+        return <Dashboard onShowStudentsByClass={() => setShowStudentsByClass(true)} />;
     }
   };
 
   const getSectionTitle = () => {
+    if (showStudentsByClass) {
+      return "Students by Class";
+    }
+
     const titles = {
       dashboard: "Dashboard Overview",
       students: "Student Management",

@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Users, BookOpen, Award, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export function Dashboard() {
+interface DashboardProps {
+  onShowStudentsByClass?: () => void;
+}
+
+export function Dashboard({ onShowStudentsByClass }: DashboardProps) {
   const navigate = useNavigate();
 
   const quickActions = [
@@ -64,7 +68,7 @@ export function Dashboard() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="card-3d">
+        <Card className="card-3d cursor-pointer hover:shadow-lg transition-shadow" onClick={onShowStudentsByClass}>
           <CardHeader>
             <CardTitle className="text-[#5D916A] flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -73,7 +77,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-[#7ED6A7]">1,234</p>
-            <p className="text-[#5D916A] text-sm">Active students</p>
+            <p className="text-[#5D916A] text-sm">Click to view by class</p>
           </CardContent>
         </Card>
 
