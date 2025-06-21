@@ -2,13 +2,9 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Book } from "lucide-react";
+import { Book, Plus } from "lucide-react";
+import { AddHomework } from "./AddHomework";
 
 interface Homework {
   id: string;
@@ -21,6 +17,7 @@ interface Homework {
 }
 
 export function HomeworkManager() {
+  const [showAddForm, setShowAddForm] = useState(false);
   const [homework, setHomework] = useState<Homework[]>([
     {
       id: "1",
@@ -42,115 +39,43 @@ export function HomeworkManager() {
     }
   ]);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newHomework, setNewHomework] = useState({
-    title: "",
-    subject: "",
-    grade: "",
-    dueDate: "",
-    description: "",
-  });
-
-  const handleAddHomework = () => {
-    const homework_item: Homework = {
-      id: Date.now().toString(),
-      ...newHomework,
-      status: "active",
-    };
-    setHomework([...homework, homework_item]);
-    setNewHomework({ title: "", subject: "", grade: "", dueDate: "", description: "" });
-    setIsDialogOpen(false);
-  };
+  if (showAddForm) {
+    return <AddHomework onBack={() => setShowAddForm(false)} />;
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-          <Book className="h-8 w-8 text-green-600" />
+        <h1 className="text-3xl font-bold text-[#5D916A] flex items-center gap-2">
+          <Book className="h-8 w-8" />
           Homework Management
         </h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-green-600 hover:bg-green-700">Create Homework</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Create New Homework</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={newHomework.title}
-                  onChange={(e) => setNewHomework({ ...newHomework, title: e.target.value })}
-                  placeholder="Enter homework title"
-                />
-              </div>
-              <div>
-                <Label htmlFor="subject">Subject</Label>
-                <Input
-                  id="subject"
-                  value={newHomework.subject}
-                  onChange={(e) => setNewHomework({ ...newHomework, subject: e.target.value })}
-                  placeholder="Enter subject"
-                />
-              </div>
-              <div>
-                <Label htmlFor="grade">Grade</Label>
-                <Select onValueChange={(value) => setNewHomework({ ...newHomework, grade: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="9">Grade 9</SelectItem>
-                    <SelectItem value="10">Grade 10</SelectItem>
-                    <SelectItem value="11">Grade 11</SelectItem>
-                    <SelectItem value="12">Grade 12</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="dueDate">Due Date</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={newHomework.dueDate}
-                  onChange={(e) => setNewHomework({ ...newHomework, dueDate: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={newHomework.description}
-                  onChange={(e) => setNewHomework({ ...newHomework, description: e.target.value })}
-                  placeholder="Enter homework description"
-                />
-              </div>
-              <Button onClick={handleAddHomework} className="w-full">Create Homework</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          onClick={() => setShowAddForm(true)}
+          className="bg-[#7ED6A7] hover:bg-[#5D916A] text-white flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Create Homework
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {homework.map((item) => (
-          <Card key={item.id} className="hover:shadow-lg transition-shadow">
+          <Card key={item.id} className="card-3d hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{item.title}</CardTitle>
-                <Badge variant={item.status === "active" ? "default" : "secondary"}>
+                <CardTitle className="text-lg text-[#5D916A]">{item.title}</CardTitle>
+                <Badge variant={item.status === "active" ? "default" : "secondary"} className="bg-[#7ED6A7] text-white">
                   {item.status}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <p><strong>Subject:</strong> {item.subject}</p>
-                <p><strong>Grade:</strong> {item.grade}</p>
-                <p><strong>Due Date:</strong> {item.dueDate}</p>
-                <p><strong>Description:</strong> {item.description}</p>
+                <p className="text-[#5D916A]"><strong>Subject:</strong> {item.subject}</p>
+                <p className="text-[#5D916A]"><strong>Grade:</strong> {item.grade}</p>
+                <p className="text-[#5D916A]"><strong>Due Date:</strong> {item.dueDate}</p>
+                <p className="text-[#5D916A]"><strong>Description:</strong> {item.description}</p>
               </div>
             </CardContent>
           </Card>
