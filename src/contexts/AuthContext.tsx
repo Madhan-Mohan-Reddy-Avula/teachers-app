@@ -66,13 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (hashError) throw hashError;
 
-      // Check faculty credentials
+      // Check faculty credentials in faculty_profiles table
       const { data: facultyProfile, error: profileError } = await supabase
         .from('faculty_profiles')
-        .select(`
-          *,
-          faculty:faculty_id (*)
-        `)
+        .select('*')
         .eq('email', email)
         .eq('password_hash', hashResult)
         .single();
@@ -81,9 +78,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: 'Invalid email or password' };
       }
 
-      // Store email in localStorage and load profile
+      // Get the full faculty data using the faculty_id
+      const { data: facultyData, error: facultyError } = await supabase
+        .from('faculty')
+        .select('*')
+        .eq('id', facultyProfile.faculty_id)
+        .single();
+
+      if (facultyError || !facultyData) {
+        return { error: 'Faculty profile not found' };
+      }
+
+      // Store email in localStorage and set faculty data
       localStorage.setItem('faculty_email', email);
-      setFaculty(facultyProfile.faculty);
+      setFaculty(facultyData);
       
       return {};
     } catch (error) {
