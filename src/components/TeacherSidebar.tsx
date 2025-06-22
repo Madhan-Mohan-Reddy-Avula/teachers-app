@@ -1,88 +1,94 @@
 
-import { Book, Calendar, Users, BookOpen, Trophy, Clock } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { Calendar, Users, BookOpen, Trophy, Clock, BarChart, User, LogOut } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface TeacherSidebarProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
 }
 
-const menuItems = [
-  { id: "dashboard", title: "Dashboard", icon: BookOpen },
-  { id: "students", title: "Students", icon: Users },
-  { id: "homework", title: "Homework", icon: Book },
-  { id: "events", title: "Events", icon: Calendar },
-  { id: "timetable", title: "Timetable", icon: Clock },
-  { id: "results", title: "Results", icon: Trophy },
-];
-
 export function TeacherSidebar({ activeSection, setActiveSection }: TeacherSidebarProps) {
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const { faculty, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: BarChart },
+    { id: "students", label: "Students", icon: Users },
+    { id: "homework", label: "Homework", icon: BookOpen },
+    { id: "events", label: "Events", icon: Calendar },
+    { id: "timetable", label: "Timetable", icon: Clock },
+    { id: "results", label: "Results", icon: Trophy },
+  ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
-    <Sidebar className={`${isCollapsed ? "w-14" : "w-64"} sidebar-3d`} collapsible="icon">
-      <div className="p-4 border-b border-white/20">
-        <SidebarTrigger className="mb-4 text-white hover:bg-white/20" />
-        {!isCollapsed && (
-          <div className="flex items-center gap-3">
+    <Sidebar className="border-r border-[#7ED6A7]/20">
+      <SidebarHeader className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#7ED6A7] to-[#5D916A] flex items-center justify-center">
             <img 
               src="/lovable-uploads/f335eb3b-5a51-4fb6-b14f-493524b71168.png" 
-              alt="Schools App Logo" 
-              className="w-10 h-10 logo-3d"
-            />
-            <div>
-              <h2 className="text-xl font-bold text-white text-shadow-soft">Schools App</h2>
-              <p className="text-white/80 text-sm">Teacher Portal</p>
-            </div>
-          </div>
-        )}
-        {isCollapsed && (
-          <div className="flex justify-center">
-            <img 
-              src="/lovable-uploads/f335eb3b-5a51-4fb6-b14f-493524b71168.png" 
-              alt="Schools App Logo" 
-              className="w-8 h-8 logo-3d"
+              alt="Schools App" 
+              className="w-6 h-6 logo-3d"
             />
           </div>
-        )}
-      </div>
+          <div>
+            <h2 className="text-lg font-bold text-[#5D916A]">Schools App</h2>
+            <p className="text-sm text-[#5D916A]/70">Teacher Portal</p>
+          </div>
+        </div>
+      </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-white/70 font-semibold">Management</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    onClick={() => setActiveSection(item.id)}
-                    className={`w-full transition-all duration-200 ${
-                      activeSection === item.id
-                        ? "bg-white/20 text-white font-semibold shadow-lg"
-                        : "text-white/90 hover:bg-white/10 hover:text-white"
-                    }`}
-                  >
-                    <item.icon className="mr-2 h-5 w-5" />
-                    {!isCollapsed && <span className="text-shadow-soft">{item.title}</span>}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarMenu>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <SidebarMenuItem key={item.id}>
+                <SidebarMenuButton
+                  onClick={() => setActiveSection(item.id)}
+                  isActive={activeSection === item.id}
+                  className="w-full justify-start gap-3 py-3 px-4 text-[#5D916A] hover:bg-[#7ED6A7]/10 data-[active=true]:bg-[#7ED6A7] data-[active=true]:text-white"
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.label}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
       </SidebarContent>
+
+      <SidebarFooter className="p-4">
+        <div className="space-y-2">
+          <SidebarMenuButton
+            onClick={() => navigate('/profile')}
+            className="w-full justify-start gap-3 py-3 px-4 text-[#5D916A] hover:bg-[#7ED6A7]/10"
+          >
+            <User className="h-5 w-5" />
+            Profile
+          </SidebarMenuButton>
+          <SidebarMenuButton
+            onClick={handleLogout}
+            className="w-full justify-start gap-3 py-3 px-4 text-[#5D916A] hover:bg-red-50 hover:text-red-600"
+          >
+            <LogOut className="h-5 w-5" />
+            Logout
+          </SidebarMenuButton>
+        </div>
+        {faculty && (
+          <div className="mt-4 p-3 bg-[#F8E4BE] rounded-lg">
+            <p className="text-sm font-medium text-[#5D916A]">{faculty.name}</p>
+            <p className="text-xs text-[#5D916A]/70">{faculty.department}</p>
+          </div>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
 }

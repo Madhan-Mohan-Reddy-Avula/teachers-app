@@ -257,6 +257,8 @@ export type Database = {
           email: string
           id: string
           name: string
+          password: string | null
+          password_hash: string | null
           phone: string | null
           school_id: string | null
           subject: string
@@ -268,6 +270,8 @@ export type Database = {
           email: string
           id?: string
           name: string
+          password?: string | null
+          password_hash?: string | null
           phone?: string | null
           school_id?: string | null
           subject: string
@@ -279,6 +283,8 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          password?: string | null
+          password_hash?: string | null
           phone?: string | null
           school_id?: string | null
           subject?: string
@@ -287,6 +293,51 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "faculty_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      faculty_profiles: {
+        Row: {
+          created_at: string
+          email: string
+          faculty_id: string | null
+          id: string
+          password_hash: string
+          school_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          faculty_id?: string | null
+          id?: string
+          password_hash: string
+          school_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          faculty_id?: string | null
+          id?: string
+          password_hash?: string
+          school_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faculty_profiles_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faculty_profiles_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -708,6 +759,7 @@ export type Database = {
           postal_code: string | null
           principal_name: string | null
           school_type: string | null
+          schoolcode: string
           state: string | null
           updated_at: string
           website: string | null
@@ -725,6 +777,7 @@ export type Database = {
           postal_code?: string | null
           principal_name?: string | null
           school_type?: string | null
+          schoolcode?: string
           state?: string | null
           updated_at?: string
           website?: string | null
@@ -742,6 +795,7 @@ export type Database = {
           postal_code?: string | null
           principal_name?: string | null
           school_type?: string | null
+          schoolcode?: string
           state?: string | null
           updated_at?: string
           website?: string | null
@@ -985,7 +1039,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      hash_password: {
+        Args: { password: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

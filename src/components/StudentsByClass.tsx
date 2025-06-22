@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Users, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Class {
   id: string;
@@ -35,16 +36,22 @@ export function StudentsByClass({ onBack }: StudentsByClassProps) {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { faculty } = useAuth();
 
   useEffect(() => {
-    fetchClasses();
-  }, []);
+    if (faculty?.school_id) {
+      fetchClasses();
+    }
+  }, [faculty]);
 
   const fetchClasses = async () => {
+    if (!faculty?.school_id) return;
+
     try {
       const { data, error } = await supabase
         .from('classes')
         .select('*')
+        .eq('school_id', faculty.school_id)
         .order('year', { ascending: true });
 
       if (error) throw error;
@@ -60,12 +67,15 @@ export function StudentsByClass({ onBack }: StudentsByClassProps) {
   };
 
   const fetchStudentsByClass = async (classId: string) => {
+    if (!faculty?.school_id) return;
+
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('class_id', classId)
+        .eq('school_id', faculty.school_id)
         .order('name', { ascending: true });
 
       if (error) throw error;
