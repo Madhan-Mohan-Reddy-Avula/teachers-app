@@ -1,26 +1,15 @@
-
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LoginPage } from '@/pages/LoginPage';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
+export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { user, loading } = useAuth();
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { faculty, loading } = useAuth();
+  if (loading) return <div>Loading...</div>;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F8E4BE] to-[#7ED6A7]">
-        <div className="text-[#5D916A] text-xl">Loading...</div>
-      </div>
-    );
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (!faculty) {
-    return <LoginPage />;
-  }
-
-  return <>{children}</>;
-}
+  return children;
+};

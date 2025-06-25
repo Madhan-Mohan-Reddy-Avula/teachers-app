@@ -1,121 +1,79 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client'; // adjust path
 
-interface Faculty {
+interface User {
   id: string;
   email: string;
-  name: string;
-  department: string;
-  subject: string;
-  school_id: string;
-  phone?: string;
+  name?: string;
+  school_id?: string; // ✅ important for school-based data
 }
 
 interface AuthContextType {
-  faculty: Faculty | null;
+  user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ error?: string }>;
-  logout: () => Promise<void>;
+  login: (email: string) => Promise<{ error?: string }>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [faculty, setFaculty] = useState<Faculty | null>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      setUser(JSON.parse(stored));
+    }
+    setLoading(false);
   }, []);
 
-  const checkAuth = async () => {
+  const login = async (email: string) => {
     try {
-      const email = localStorage.getItem('faculty_email');
-      if (email) {
-        await loadFacultyProfile(email);
-      }
-    } catch (error) {
-      console.error('Auth check error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const cleanEmail = email.trim().toLowerCase();
 
-  const loadFacultyProfile = async (email: string) => {
-    try {
+      // ✅ Query faculty from Supabase
       const { data, error } = await supabase
         .from('faculty')
-        .select('*')
-        .eq('email', email)
+        .select('id, name, email, school_id')
+        .eq('email', cleanEmail)
         .single();
 
-      if (error) throw error;
-      setFaculty(data);
-    } catch (error) {
-      console.error('Error loading faculty profile:', error);
-      localStorage.removeItem('faculty_email');
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    try {
-      // Hash the password using the same method as stored
-      const { data: hashResult, error: hashError } = await supabase
-        .rpc('hash_password', { password });
-
-      if (hashError) throw hashError;
-
-      // Check faculty credentials in faculty_profiles table
-      const { data: facultyProfile, error: profileError } = await supabase
-        .from('faculty_profiles')
-        .select('*')
-        .eq('email', email)
-        .eq('password_hash', hashResult)
-        .single();
-
-      if (profileError || !facultyProfile) {
-        return { error: 'Invalid email or password' };
+      if (error || !data) {
+        return { error: 'User not found or unauthorized' };
       }
 
-      // Get the full faculty data using the faculty_id
-      const { data: facultyData, error: facultyError } = await supabase
-        .from('faculty')
-        .select('*')
-        .eq('id', facultyProfile.faculty_id)
-        .single();
+      const newUser: User = {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        school_id: data.school_id,
+      };
 
-      if (facultyError || !facultyData) {
-        return { error: 'Faculty profile not found' };
-      }
-
-      // Store email in localStorage and set faculty data
-      localStorage.setItem('faculty_email', email);
-      setFaculty(facultyData);
-      
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
       return {};
-    } catch (error) {
-      console.error('Login error:', error);
-      return { error: 'Login failed' };
+    } catch (err) {
+      console.error('Login error:', err);
+      return { error: 'Login failed. Try again.' };
     }
   };
 
-  const logout = async () => {
-    localStorage.removeItem('faculty_email');
-    setFaculty(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ faculty, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
-}
+};
